@@ -1,93 +1,3 @@
-defmodule Mix.Tasks.Alice.New.Handler.Common do
-  require Mix.Generator
-
-  @alice_version Mix.Project.config()[:version]
-
-  templates = [
-    formatter: "templates/formatter.exs",
-    gitignore: "templates/gitignore.eex",
-    readme: "templates/new_handler/README.md.eex",
-    mix_exs: "templates/new_handler/mix.exs.eex",
-    config: "templates/new_handler/config/config.exs.eex",
-    handler: "templates/new_handler/lib/alice/handlers/handler.ex.eex",
-    handler_test: "templates/new_handler/test/alice/handlers/handler_test.exs.eex"
-  ]
-
-  Enum.each(templates, fn {name, file} ->
-    Mix.Generator.embed_template(name, from_file: file)
-  end)
-
-  def formatter(assigns), do: formatter_template(assigns)
-  def gitignore(assigns), do: gitignore_template(assigns)
-
-  def alice_version(), do: @alice_version
-
-  def elixir_version_check! do
-    unless Version.match?(System.version(), "~> 1.7") do
-      Mix.raise(
-        "Alice v#{@alice_version} requires at least Elixir v1.7.\n " <>
-          "You have #{System.version()}. Please update accordingly"
-      )
-    end
-  end
-
-  def check_handler_name!(name, inferred?) do
-    unless name =~ Regex.recompile!(~r/^[a-z][a-z0-9_]*$/) do
-      inferred_message =
-        if inferred? do
-          ". The handler name is inferred from the path, if you'd like to " <>
-            "explicitly name the handler then use the \"--handler NAME\" option"
-        else
-          ""
-        end
-
-      Mix.raise(
-        "Handler name must start with a lowercase ASCII letter, followed by " <>
-          "lowercase ASCII letters, numbers, or underscores, got: #{inspect(name)}" <>
-          inferred_message
-      )
-    end
-
-    if name |> String.trim() |> String.downcase() == "alice" do
-      Mix.raise("Handler name cannot be alice")
-    end
-  end
-
-  def check_mod_name_validity!(name) do
-    unless name =~ Regex.recompile!(~r/^[A-Z]\w*(\.[A-Z]\w*)*$/) do
-      Mix.raise(
-        "Module name must be a valid Elixir alias (for example: MyHandler), got: #{inspect(name)}"
-      )
-    end
-  end
-
-  def handler_module(module_name) do
-    Module.concat(["Alice", "Handlers", module_name])
-  end
-
-  def check_mod_name_availability!(module) do
-    module
-    |> Module.split()
-    |> Enum.reduce([], fn name, acc ->
-      mod = Module.concat([Elixir, name | acc])
-
-      if Code.ensure_loaded?(mod) do
-        Mix.raise("Module name #{inspect(mod)} is already taken, please choose another name")
-      else
-        [name | acc]
-      end
-    end)
-  end
-
-  def check_directory_existence!(path) do
-    msg = "The directory #{inspect(path)} already exists. Are you sure you want to continue?"
-
-    if File.dir?(path) and not Mix.shell().yes?(msg) do
-      Mix.raise("Please select another directory for installation")
-    end
-  end
-end
-
 defmodule Mix.Tasks.Alice.New.Handler do
   @moduledoc ~S"""
   Generates a new Alice handler.
@@ -150,7 +60,7 @@ defmodule Mix.Tasks.Alice.New.Handler do
   In `test/alice/handlers/my_handler_test.exs`:
 
   ```elixir
-  defmodule Alice.Handlers.MyHandler do
+  defmodule Alice.Handlers.MyHandlerTest do
     use Alice.HandlersCase, handlers: Alice.Handlers.MyHandler
 
     test "the repeat command repeats a term" do
@@ -178,10 +88,13 @@ defmodule Mix.Tasks.Alice.New.Handler do
   ```
   """
   use Mix.Task
-  import Mix.Generator
-  alias Mix.Tasks.Alice.New.Handler.Common
 
-  @shortdoc "Creates a new Alice v#{Common.alice_version()} handler"
+  alias AliceNew.{
+    HandlerGenerator,
+    Utilities
+  }
+
+  @shortdoc "Creates a new Alice v#{Utilities.alice_version()} handler"
 
   @switches [
     name: :string,
@@ -189,7 +102,7 @@ defmodule Mix.Tasks.Alice.New.Handler do
   ]
 
   def run([version]) when version in ~w[-v --version] do
-    Mix.shell().info("Alice v#{Common.alice_version()}")
+    Mix.shell().info("Alice v#{Utilities.alice_version()}")
   end
 
   def run(argv) do
@@ -198,75 +111,30 @@ defmodule Mix.Tasks.Alice.New.Handler do
         Mix.Tasks.Help.run(["alice.new.handler"])
 
       {opts, [path | _]} ->
-        Common.elixir_version_check!()
+        Utilities.elixir_version_check!()
 
         basename = Path.basename(Path.expand(path))
         path = Path.join([Path.dirname(path), "alice_#{basename}"])
 
         handler_name = opts[:name] || basename
         app = "alice_#{handler_name}"
-        Common.check_handler_name!(handler_name, !opts[:name])
+        Utilities.check_handler_name!(handler_name, !opts[:name])
 
         module_name = opts[:module] || Macro.camelize(handler_name)
-        Common.check_mod_name_validity!(module_name)
+        Utilities.check_mod_name_validity!(module_name)
 
-        module = Common.handler_module(module_name)
-        Common.check_mod_name_availability!(module)
+        module = Utilities.handler_module(module_name)
+        Utilities.check_mod_name_availability!(module)
 
         unless path == "." do
-          Common.check_directory_existence!(path)
+          Utilities.check_directory_existence!(path)
           File.mkdir_p!(path)
         end
 
         File.cd!(path, fn ->
-          generate(app, handler_name, module, path, opts)
+          HandlerGenerator.generate(app, handler_name, module, path)
         end)
     end
-  end
-
-  defp generate(app_name, handler_name, handler_module, path, opts) do
-    Mix.shell().info(
-      "#{
-        inspect(
-          app_name: app_name,
-          handler_name: handler_name,
-          handler_module: handler_module,
-          path: path,
-          opts: opts
-        )
-      }"
-    )
-
-    assigns = [
-      app_name: app_name,
-      handler_name: handler_name,
-      handler_module: handler_module,
-      elixir_version: get_version(System.version()),
-      alice_version: Common.alice_version()
-    ]
-
-    create_file(".formatter.exs", Common.formatter(assigns))
-    create_file(".gitignore", Common.gitignore(assigns))
-    # create_file("README.md", Common.readme_template(assigns))
-    # create_file("mix.exs", Common.mix_exs_template(assigns))
-    #
-    # create_directory("config")
-    # create_file("config/config/exs", Common.config_template(assigns))
-    #
-    # create_directory("lib")
-    # create_directory("lib/alice/handlers")
-    #
-    # create_file(
-    #   "lib/alice/handlers/#{handler_name}.ex",
-    #   Common.handler_template(assigns)
-    # )
-    #
-    # create_directory("test/alice/handlers")
-    #
-    # create_file(
-    #   "test/alice/handlers/#{handler_name}_test.exs",
-    #   Common.handler_test_template(assigns)
-    # )
   end
 
   defp parse_opts(argv) do
@@ -281,14 +149,4 @@ defmodule Mix.Tasks.Alice.New.Handler do
 
   defp switch_to_string({name, nil}), do: name
   defp switch_to_string({name, val}), do: "#{name}=#{val}"
-
-  defp get_version(version) do
-    {:ok, version} = Version.parse(version)
-
-    "#{version.major}.#{version.minor}" <>
-      case version.pre do
-        [h | _] -> "-#{h}"
-        [] -> ""
-      end
-  end
 end

@@ -1,14 +1,14 @@
 defmodule AliceNew.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @alice_version "0.4.2"
   @github "https://github.com/alice-bot/alice_new"
 
   def project do
     [
       app: :alice_new,
       start_permanent: Mix.env() == :prod,
-      version: @version,
+      version: @alice_version,
       elixir: "~> 1.7",
       deps: deps(),
       package: [
@@ -61,6 +61,6 @@ defmodule AliceNew.MixProject do
     Mix.Tasks.Archive.Build.run([])
     Mix.Tasks.Archive.Build.run(["--output=alice_new.ez"])
     File.rename("alice_new.ez", "./archives/alice_new.ez")
-    File.rename("alice_new-#{@version}.ez", "./archives/alice_new-#{@version}.ez")
+    File.rename("alice_new-#{@alice_version}.ez", "./archives/alice_new-#{@alice_version}.ez")
   end
 end
