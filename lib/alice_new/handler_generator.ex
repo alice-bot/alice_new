@@ -1,4 +1,5 @@
 defmodule AliceNew.HandlerGenerator do
+  @moduledoc false
   import Mix.Generator
   alias AliceNew.Utilities
 

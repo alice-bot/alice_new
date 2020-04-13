@@ -1,7 +1,7 @@
 defmodule AliceNew.Utilities do
-  @alice_version Mix.Project.config()[:version]
+  @moduledoc false
 
-  def alice_version(), do: @alice_version
+  def alice_version(), do: Mix.Project.config()[:version]
 
   def elixir_version() do
     {:ok, version} = Version.parse(System.version())
@@ -16,7 +16,7 @@ defmodule AliceNew.Utilities do
   def elixir_version_check! do
     unless Version.match?(System.version(), "~> 1.7") do
       Mix.raise(
-        "Alice v#{@alice_version} requires at least Elixir v1.7.\n " <>
+        "Alice v#{alice_version()} requires at least Elixir v1.7.\n " <>
           "You have #{System.version()}. Please update accordingly"
       )
     end
@@ -54,21 +54,6 @@ defmodule AliceNew.Utilities do
 
   def handler_module(module_name) do
     "Alice.Handlers.#{module_name}"
-  end
-
-  def check_mod_name_availability!(module) do
-    [module]
-    |> Module.concat()
-    |> Module.split()
-    |> Enum.reduce([], fn name, acc ->
-      mod = Module.concat([Elixir, name | acc])
-
-      if Code.ensure_loaded?(mod) do
-        Mix.raise("Module name #{inspect(mod)} is already taken, please choose another name")
-      else
-        [name | acc]
-      end
-    end)
   end
 
   def check_directory_existence!(path) do

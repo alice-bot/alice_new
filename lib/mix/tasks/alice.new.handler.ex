@@ -122,9 +122,7 @@ defmodule Mix.Tasks.Alice.New.Handler do
 
         module_name = opts[:module] || Macro.camelize(handler_name)
         Utilities.check_mod_name_validity!(module_name)
-
         module = Utilities.handler_module(module_name)
-        Utilities.check_mod_name_availability!(module)
 
         unless path == "." do
           Utilities.check_directory_existence!(path)
@@ -142,11 +140,8 @@ defmodule Mix.Tasks.Alice.New.Handler do
       {opts, argv, []} ->
         {opts, argv}
 
-      {_opts, _argv, [switch | _]} ->
-        Mix.raise("Invalid option: #{switch_to_string(switch)}")
+      {_opts, _argv, [{name, _val} | _]} ->
+        Mix.raise("Invalid option: #{name}")
     end
   end
-
-  defp switch_to_string({name, nil}), do: name
-  defp switch_to_string({name, val}), do: "#{name}=#{val}"
 end
