@@ -12,23 +12,23 @@ defmodule AliceNew.MixProject do
       elixir: "~> 1.7",
       deps: deps(),
       package: [
-        maintainers: ["Adam Zaninovich"],
         licenses: ["MIT"],
         links: %{github: @github},
-        files: ~w[lib templates mix.exs README.md]
+        files: ~w(lib templates .formatter.exs mix.exs README* LICENSE* CHANGELOG*)
       ],
       source_url: @github,
       homepage_url: "https://www.alice-bot.org",
       docs: [main: "Mix.Tasks.Alice.New"],
       aliases: aliases(),
       preferred_cli_env: [
+        build: :prod,
         coveralls: :test,
         "coveralls.html": :test,
         "coveralls.json": :test
       ],
       test_coverage: [tool: ExCoveralls],
       description: """
-      Alice bot project generator.
+      AliceNew - Mix task to generate a new Alice handler
 
       Provides a `mix alice.new.handler` task to bootstrap a new Alice handler
       """
@@ -61,6 +61,7 @@ defmodule AliceNew.MixProject do
     Mix.Tasks.Compile.run([])
     Mix.Tasks.Archive.Build.run([])
     Mix.Tasks.Archive.Build.run(["--output=alice_new.ez"])
+    File.mkdir_p("./archives")
     File.rename("alice_new.ez", "./archives/alice_new.ez")
     File.rename("alice_new-#{@alice_version}.ez", "./archives/alice_new-#{@alice_version}.ez")
   end
