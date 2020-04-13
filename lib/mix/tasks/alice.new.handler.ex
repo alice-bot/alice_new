@@ -46,7 +46,7 @@ defmodule Mix.Tasks.Alice.New.Handler do
   ## Testing Handlers
 
   Alice provides several helpers to make it easy to test your handlers.  First
-  you'll need to invoke to add `use Alice.HandlersCase, handlers:
+  you'll need to invoke to add `use Alice.HandlerCase, handlers:
   [YourHandler]` passing it the handler you're trying to test. Then you can use
   `message_received()` within your test, which will simulate a message coming
   in from the chat backend and route it through to the handlers appropriately.
@@ -61,7 +61,7 @@ defmodule Mix.Tasks.Alice.New.Handler do
 
   ```elixir
   defmodule Alice.Handlers.MyHandlerTest do
-    use Alice.HandlersCase, handlers: Alice.Handlers.MyHandler
+    use Alice.HandlerCase, handlers: Alice.Handlers.MyHandler
 
     test "the repeat command repeats a term" do
       send_message("<@alice> repeat after me: this is a boring handler")
