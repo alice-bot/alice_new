@@ -1,7 +1,7 @@
 defmodule AliceNew.Utilities do
   @moduledoc false
 
-  def alice_version(), do: "0.4.2"
+  def alice_version(), do: "0.4.3"
 
   def elixir_version() do
     {:ok, version} = Version.parse(System.version())

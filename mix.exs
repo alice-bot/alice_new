@@ -1,7 +1,7 @@
 defmodule AliceNew.MixProject do
   use Mix.Project
 
-  @alice_version "0.4.2"
+  @alice_version "0.4.3"
   @github "https://github.com/alice-bot/alice_new"
 
   def project do

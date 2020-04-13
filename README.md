@@ -4,7 +4,7 @@ Provides `alice.new.handler` generator as an archive.
 
 To install from hex, run:
 
-    $ mix archive.install hex alice_new 0.4.2
+    $ mix archive.install hex alice_new 0.4.3
 
 To build and install it locally, ensure any previous archive versions are
 removed:
