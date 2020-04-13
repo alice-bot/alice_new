@@ -53,11 +53,12 @@ defmodule AliceNew.Utilities do
   end
 
   def handler_module(module_name) do
-    Module.concat(["Alice", "Handlers", module_name])
+    "Alice.Handlers.#{module_name}"
   end
 
   def check_mod_name_availability!(module) do
-    module
+    [module]
+    |> Module.concat()
     |> Module.split()
     |> Enum.reduce([], fn name, acc ->
       mod = Module.concat([Elixir, name | acc])
