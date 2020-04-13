@@ -47,7 +47,7 @@ defmodule Mix.Tasks.Alice.New.HandlerTest do
 
           assert_file("#{@app_name}/test/alice/handlers/#{@handler_name}_test.exs", fn file ->
             assert file =~ "defmodule Alice.Handlers.#{@module_name}Test do"
-            assert file =~ "use Alice.HandlersCase, handlers: Alice.Handlers.SuperAwesome"
+            assert file =~ "use Alice.HandlerCase, handlers: Alice.Handlers.SuperAwesome"
             assert file =~ "send_message"
             assert file =~ "first_reply"
           end)
