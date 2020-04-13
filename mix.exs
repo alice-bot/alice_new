@@ -18,7 +18,7 @@ defmodule AliceNew.MixProject do
       ],
       source_url: @github,
       homepage_url: "https://www.alice-bot.org",
-      docs: [main: "Mix.Tasks.Alice.New"],
+      docs: [main: "Mix.Tasks.Alice.New.Handler"],
       aliases: aliases(),
       preferred_cli_env: [
         build: :prod,
