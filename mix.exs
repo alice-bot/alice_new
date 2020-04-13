@@ -46,7 +46,8 @@ defmodule AliceNew.MixProject do
   defp deps do
     [
       {:ex_doc, "~> 0.21", only: [:dev, :docs], runtime: false},
-      {:excoveralls, "~> 0.12.3", only: :test}
+      {:excoveralls, "~> 0.12", only: :test},
+      {:credo, "~> 1.3", only: :dev, runtime: false}
     ]
   end
 
